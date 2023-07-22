@@ -36,8 +36,19 @@
     				<p class="price"><span>Price : {{product.product_price}}</span></p>
     				<p class="price"><span>Size : {{product.product_size}}</span></p>
 						
-          	<p><a href="{% url 'seller-product-edit' pk=product.pk %}" class="btn btn-black py-3 px-5 mr-2">Add To Cart</a>
-          		<a href="{% url 'add-to-wishlist' pk=product.pk %}" class="btn btn-black py-3 px-5 mr-2">Add To Wishlist</a></p>
+          	<p>
+          		{% if cart_flag == True %}
+          			<a href="{% url 'remove-from-cart' pk=product.pk %}" class="btn btn-danger py-3 px-5 mr-2">Remove From Cart</a>
+          		{% else %}
+          			<a href="{% url 'add-to-cart' pk=product.pk %}" class="btn btn-black py-3 px-5 mr-2">Add To Cart</a>
+          		{% endif %}
+          		{% if wishlist_flag == True %}
+          			<a href="{% url 'remove-from-wishlist' pk=product.pk %}" class="btn btn-danger py-3 px-5 mr-2">Remove From Wishlist</a>
+          		{% else %}
+          			<a href="{% url 'add-to-wishlist' pk=product.pk %}" class="btn btn-black py-3 px-5 mr-2">Add To Wishlist</a>
+          		{% endif %}
+          		
+          	</p>
     			</div>
     		</div>
 

@@ -29,6 +29,7 @@
     					{% if msg %}
 			              <b style="color:blue">{{msg}}</b>
 			            {% endif %}
+			            {% if wishlists %}
     					{% for i in wishlists %}
 		    			<div class="col-sm-12 col-md-12 col-lg-4 ftco-animate d-flex">
 		    				<div class="product d-flex flex-column">
@@ -55,6 +56,9 @@
 		    			</div>
 		    			
 		    			{% endfor %}
+		    			{% else %}
+		    				<h1>No Products In Wishlist</h1>
+		    			{% endif %}
 		    		</div>
 		    		
 		    	</div>
