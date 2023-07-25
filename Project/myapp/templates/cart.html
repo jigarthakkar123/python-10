@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-   
+   <script src="https://js.stripe.com/v3/"></script>
   </head>
   <body class="goto-here">
 	
@@ -75,7 +75,10 @@
 		    				<h1>No Products In Cart</h1>
 		    			{% endif %}
 		    		</div>
-		    		<h1>Net Price : {{net_price}}</h1>
+		    		<form method="post">
+							<input type="hidden" id="net_price" name="amount" value="{{net_price}}">
+							<button type="button" class="btn btn-lg btn-primary" id="checkout-button">Checkout</button>
+						</form>
 		    	</div>
 
 		    	
@@ -83,63 +86,43 @@
     	</div>
     </section>
 		
-		<section class="ftco-gallery">
-    	<div class="container">
-    		<div class="row justify-content-center">
-    			<div class="col-md-8 heading-section text-center mb-4 ftco-animate">
-            <h2 class="mb-4">Follow Us On Instagram</h2>
-            <p>Far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts. Separated they live in</p>
-          </div>
-    		</div>
-    	</div>
-    	<div class="container-fluid px-0">
-    		<div class="row no-gutters">
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-1.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-1.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-2.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-2.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-3.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-3.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-4.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-4.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-5.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-5.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-					<div class="col-md-4 col-lg-2 ftco-animate">
-						<a href="{% static 'images/gallery-6.jpg' %}" class="gallery image-popup img d-flex align-items-center" style="background-image: url({% static 'images/gallery-6.jpg' %});">
-							<div class="icon mb-4 d-flex align-items-center justify-content-center">
-    						<span class="icon-instagram"></span>
-    					</div>
-						</a>
-					</div>
-        </div>
-    	</div>
-    </section>
+		
+    <script type="text/javascript">
 
+		var stripe = Stripe('pk_test_51MshH6SJuXwPfjjrrgxJ5tubbOgYAhRrqNcd4RDUSq1peWpIMZrjhIiTncSUWO9u6byeDf4KxdZPkFD4hU55mVOg00aRL5RT8x');
+ 		var checkoutButton = document.getElementById('checkout-button');
+
+ checkoutButton.addEventListener('click', function() {
+ 
+ 
+ fetch('/create-checkout-session/', {
+ method: 'POST',
+	headers:{
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest', //Necessary to work with request.is_ajax()
+
+	},
+    body: JSON.stringify({'post_data':'{{net_price}}'})
+ })
+ .then(function(response) {
+ return response.json();
+ })
+ .then(function(session) {
+ return stripe.redirectToCheckout({ sessionId: session.id });
+ })
+ .then(function(result) {
+ // If `redirectToCheckout` fails due to a browser or network
+ // error, you should display the localized error message to your
+ // customer using `error.message`.
+ if (result.error) {
+ alert(result.error.message);
+ }
+ })
+ .catch(function(error) {
+ console.error('Error:', error);
+ });
+ });
+ </script>
   </body>
 </html>
 {% endblock %}

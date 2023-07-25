@@ -1,6 +1,80 @@
 from django.shortcuts import render,redirect
 from .models import User,Product,Wishlist,Cart
+import requests
+import random
+import stripe
+from django.conf import settings
+from django.http import JsonResponse,HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.utils import timezone
+from django.http import JsonResponse
 # Create your views here.
+
+stripe.api_key = settings.STRIPE_PRIVATE_KEY
+YOUR_DOMAIN = 'http://localhost:8000'
+
+
+def validate_signup(request):
+	email=request.GET.get('email')
+	data={
+		'is_taken':User.objects.filter(email__iexact=email).exists()
+	}
+	return JsonResponse(data)
+
+@csrf_exempt
+def create_checkout_session(request):
+	amount = int(json.load(request)['post_data'])
+	final_amount=amount*100
+	
+	session = stripe.checkout.Session.create(
+		payment_method_types=['card'],
+		line_items=[{
+			'price_data': {
+				'currency': 'inr',
+				'product_data': {
+					'name': 'Checkout Session Data',
+					},
+				'unit_amount': final_amount,
+				},
+			'quantity': 1,
+			}],
+		mode='payment',
+		success_url=YOUR_DOMAIN + '/success.html',
+		cancel_url=YOUR_DOMAIN + '/cancel.html',)
+	return JsonResponse({'id': session.id})
+
+def success(request):
+	user=User.objects.get(email=request.session['email'])
+	carts=Cart.objects.filter(user=user,payment_status=False)
+	for i in carts:
+		i.payment_status=True
+		i.save()
+		
+	carts=Cart.objects.filter(user=user,payment_status=False)
+	request.session['cart_count']=len(carts)
+	return render(request,'success.html')
+
+def cancel(request):
+	return render(request,'cancel.html')
+
+def myorder(request):
+	user=User.objects.get(email=request.session['email'])
+	carts=Cart.objects.filter(user=user,payment_status=True)
+	return render(request,'myorder.html',{'carts':carts})
+
+def seller_order(request):
+	seller=User.objects.get(email=request.session['email'])
+	carts=Cart.objects.filter(payment_status=True)
+	orders=[]
+	for i in carts:
+		if i.product.seller==seller:
+			orders.append(i)
+	print(orders)
+	return render(request,'seller-order.html',{'orders':orders})
+
+
+
 def index(request):
 	return render(request,'index.html')
 
@@ -40,7 +114,7 @@ def login(request):
 				if user.usertype=="buyer":
 					wishlists=Wishlist.objects.filter(user=user)
 					request.session['wishlist_count']=len(wishlists)
-					carts=Cart.objects.filter(user=user)
+					carts=Cart.objects.filter(user=user,payment_status=False)
 					request.session['cart_count']=len(carts)
 					return render(request,'index.html')
 				else:
@@ -194,7 +268,7 @@ def product_details(request,pk):
 	except:
 		pass
 	try:
-		Cart.objects.get(user=user,product=product)
+		Cart.objects.get(user=user,product=product,payment_status=False)
 		cart_flag=True
 	except:
 		pass
@@ -236,7 +310,7 @@ def add_to_cart(request,pk):
 def cart(request):
 	net_price=0
 	user=User.objects.get(email=request.session['email'])
-	carts=Cart.objects.filter(user=user)
+	carts=Cart.objects.filter(user=user,payment_status=False)
 	for i in carts:
 		net_price=net_price+i.total_price
 	request.session['cart_count']=len(carts)

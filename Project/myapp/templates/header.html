@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{% static 'css/flaticon.css' %}">
     <link rel="stylesheet" href="{% static 'css/icomoon.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   </head>
   <body class="goto-here">
 		<div class="py-1 bg-black">
@@ -72,6 +73,7 @@
 	          
 	          <li class="nav-item"><a href="{% url 'contact' %}" class="nav-link">Contact</a></li>
             {%  if request.session.email %}
+              <li class="nav-item"><a href="{% url 'myorder' %}" class="nav-link">My Orders</a></li>
               <li class="nav-item"><a href="{% url 'wishlist' %}" class="nav-link">Wishlist[{{request.session.wishlist_count}}]</a></li>
               <li class="nav-item cta cta-colored"><a href="{% url 'cart' %}" class="nav-link"><span class="icon-shopping_cart"></span>[{{request.session.cart_count}}]</a></li>
               <li class="nav-item"><a href="{% url 'change-password' %}" class="nav-link">Change Password</a></li>
