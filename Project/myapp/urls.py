@@ -3,6 +3,7 @@ from . import  views
 
 urlpatterns = [
     path('',views.index,name='index'),
+    path('seller-index/',views.seller_index,name='seller-index'),
     path('shop/',views.shop,name='shop'),
     path('product-single/',views.product_single,name='product-single'),
     path('blog/',views.blog,name='blog'),
@@ -37,4 +38,7 @@ urlpatterns = [
     path('myorder/',views.myorder,name='myorder'),
     path('seller-order/',views.seller_order,name='seller-order'),
     path('ajax/validate_email/',views.validate_signup,name='validate_email'),
+    path('forgot-password/',views.forgot_password,name='forgot-password'),
+    path('verify-otp/',views.verify_otp,name='verify-otp'),
+    path('new-password/',views.new_password,name='new-password'),
 ]

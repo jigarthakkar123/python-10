@@ -78,6 +78,9 @@ def seller_order(request):
 def index(request):
 	return render(request,'index.html')
 
+def seller_index(request):
+	return render(request,'seller-index.html')
+
 def signup(request):
 	if request.method=="POST":
 		try:
@@ -332,3 +335,47 @@ def change_qty(request):
 	cart.product_qty=product_qty
 	cart.save()
 	return redirect('cart')
+
+def forgot_password(request):
+	if request.method=="POST":
+		try:
+			user=User.objects.get(mobile=request.POST['mobile'])
+			mobile=request.POST['mobile']
+			url = "https://www.fast2sms.com/dev/bulkV2"
+			otp=random.randint(1000,9999)
+			querystring = {"authorization":"DwF5Auzh16qo3fXC2JMSTcOiyBEZmWH0eR8GIg4NbQrpUnKsjvhz0YwyOCGvHJEFuXRrTc7feDVaM1NA","variables_values":str(otp),"route":"otp","numbers":str(mobile)}
+			headers = {
+			    'cache-control': "no-cache"
+			}
+			response = requests.request("GET", url, headers=headers, params=querystring)
+			return render(request,'otp.html',{'otp':otp,'mobile':mobile})
+		except:
+			msg="Mobile Number Not Registered"
+			return render(request,'forgot-password.html',{'msg':msg})
+	else:
+		return render(request,'forgot-password.html')
+
+def verify_otp(request):
+	otp=request.POST['otp']
+	uotp=request.POST['uotp']
+	mobile=request.POST['mobile']
+
+	if otp==uotp:
+		return render(request,'new-password.html',{'mobile':mobile})
+	else:
+		msg="Invalid OTP"
+		return render(request,'otp.html',{'otp':otp,'mobile':mobile,'msg':msg})
+def new_password(request):
+	mobile=request.POST['mobile']
+	np=request.POST['new_password']
+	cnp=request.POST['cnew_password']
+
+	if np==cnp:
+		user=User.objects.get(mobile=mobile)
+		user.password=np
+		user.save()
+		msg="Password Updated Successfully"
+		return render(request,'login.html',{'msg':msg})
+	else:
+		msg="New Password & Confirm New Password Does Not Matched"
+		return render(request,'new-password.html',{'mobile':mobile,'msg':msg})
